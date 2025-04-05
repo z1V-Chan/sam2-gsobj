@@ -22,19 +22,15 @@ with open("README.md", "r", encoding="utf-8") as f:
 
 # Required dependencies
 REQUIRED_PACKAGES = [
-    "torch>=2.3.1",
-    "torchvision>=0.18.1",
-    "numpy>=1.24.4",
-    "tqdm>=4.66.1",
+    "torch==2.3.1",
+    "torchvision==0.18.1",
+    "numpy==1.26.4",
     "hydra-core>=1.3.2",
     "iopath>=0.1.10",
-    "pillow>=9.4.0",
 ]
 
 EXTRA_PACKAGES = {
     "notebooks": [
-        "matplotlib>=3.9.1",
-        "jupyter>=1.0.0",
         "opencv-python>=4.7.0",
         "eva-decord>=0.6.1",
     ],
@@ -50,12 +46,9 @@ EXTRA_PACKAGES = {
         "strawberry-graphql>=0.243.0",
     ],
     "dev": [
-        "black==24.2.0",
         "usort==1.0.2",
         "ufmt==2.0.0b2",
         "fvcore>=0.1.5.post20221221",
-        "pandas>=2.2.2",
-        "scikit-image>=0.24.0",
         "tensorboard>=2.17.0",
         "pycocotools>=2.0.8",
         "tensordict>=0.6.0",
