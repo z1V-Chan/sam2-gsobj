@@ -194,7 +194,8 @@ def load_video_frames(
             img_std=img_std,
             compute_device=compute_device,
         )
-    elif is_str and os.path.isdir(video_path):
+    elif is_str and os.path.isdir(video_path) or isinstance(video_path, list):
+        # if video_path is a list, it is a list of image paths
         return load_video_frames_from_jpg_images(
             video_path=video_path,
             image_size=image_size,
@@ -227,7 +228,9 @@ def load_video_frames_from_jpg_images(
 
     You can load a frame asynchronously by setting `async_loading_frames` to `True`.
     """
-    if isinstance(video_path, str) and os.path.isdir(video_path):
+    if (isinstance(video_path, str) and os.path.isdir(video_path)) or isinstance(
+        video_path, list
+    ):
         jpg_folder = video_path
     else:
         raise NotImplementedError(
@@ -240,16 +243,32 @@ def load_video_frames_from_jpg_images(
             "ffmpeg to start the JPEG file from 00000.jpg."
         )
 
-    frame_names = [
-        p
-        for p in os.listdir(jpg_folder)
-        if os.path.splitext(p)[-1] in [".jpg", ".jpeg", ".JPG", ".JPEG", ".png", ".PNG"]
-    ]
-    frame_names.sort(key=lambda p: os.path.splitext(p)[0])
-    num_frames = len(frame_names)
+    if isinstance(jpg_folder, list):
+        img_paths = jpg_folder
+        img_paths.sort()
+        frame_names = [os.path.basename(p) for p in jpg_folder]
+        num_frames = len(frame_names)
+        # check if all files are images
+        for img_path in img_paths:
+            if (
+                os.path.splitext(img_path)[-1]
+                in [".jpg", ".jpeg", ".JPG", ".JPEG", ".png", ".PNG"]
+            ) and os.path.exists(img_path):
+                continue
+            raise RuntimeError(
+                f"Invalid image file: {img_path}. Only JPEG and PNG files are supported."
+            )
+    else:
+        frame_names = [
+            p for p in os.listdir(jpg_folder)
+            if os.path.splitext(p)[-1] in [".jpg", ".jpeg", ".JPG", ".JPEG", ".png", ".PNG"]
+        ]
+        frame_names.sort(key=lambda p: os.path.splitext(p)[0])
+        num_frames = len(frame_names)
+        img_paths = [os.path.join(jpg_folder, frame_name) for frame_name in frame_names]
+
     if num_frames == 0:
         raise RuntimeError(f"no images found in {jpg_folder}")
-    img_paths = [os.path.join(jpg_folder, frame_name) for frame_name in frame_names]
     img_mean = torch.tensor(img_mean, dtype=torch.float32)[:, None, None]
     img_std = torch.tensor(img_std, dtype=torch.float32)[:, None, None]
 
